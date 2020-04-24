@@ -48,7 +48,9 @@ https://github.com/adafruit/Adafruit_AHRS/blob/master/examples/calibrated_orient
 
 Complementary filter
 --------------------
-If faster responsetime is necessary, but precision is not important, the Complementary Filter might be 
+If faster response time is necessary, than what can be obtained from
+the Mahony filter, and if precision is not important, the much simpler
+Complementary Filter might be interesting.
 
 Kalman filter
 -------------
