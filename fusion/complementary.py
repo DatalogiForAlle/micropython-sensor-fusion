@@ -1,5 +1,5 @@
 import math
-from deltat import DeltaT
+from .deltat import DeltaT
 
 #GYROSCOPE_SENSITIVITY = 65.536
 GYROSCOPE_SENSITIVITY = 8.75
@@ -11,45 +11,36 @@ class ComplementaryFilter:
         self.weight = weight
         self.deltat = DeltaT(None)
 
-    def update_nomag(self, acceleration, gyro):
+    def update_nomag(self, acceleration, gyro, dt=None):
         """
         dt: Time since last call to process in milliseconds
         """
-        dt = self.deltat(None)
-        #dt = dt / 1000
-        acc_x = acceleration[0]
-        acc_y = acceleration[1]
-        acc_z = acceleration[2]
-        gyro_x = gyro[0]
-        gyro_y = gyro[1]
-        gyro_z = gyro[2]
-        w = self.weight
+        acc_x, acc_y, acc_z = acceleration
+        gyro_x, gyro_y, gyro_z = gyro
 
         if acc_x == 0 or acc_y == 0 or acc_z == 0:
             return None
 
+        deltat = self.deltat(dt)
+
         # Complementary filter on roll estimation
         roll_acc = math.degrees(math.atan2(acc_y, acc_z))
-        roll_gyro = (gyro_x / GYROSCOPE_SENSITIVITY) * dt + self.roll
-        self.roll = roll_acc * w + (1-w) * roll_gyro
+        roll_gyro = (gyro_x / GYROSCOPE_SENSITIVITY) * deltat + self.roll
+        self.roll = roll_acc * self.weight + (1-self.weight) * roll_gyro
 
         # Complementary filter on pitch estimation
         pitch_acc = math.degrees(math.atan(-1*acc_x/math.sqrt(pow(acc_y,2) + pow(acc_z,2))))
-        pitch_gyro = (gyro_y / GYROSCOPE_SENSITIVITY) * dt + self.pitch
-        self.pitch = (1-w) * pitch_gyro + w * pitch_acc
+        pitch_gyro = (gyro_y / GYROSCOPE_SENSITIVITY) * deltat + self.pitch
+        self.pitch = (1-self.weight) * pitch_gyro + self.weight * pitch_acc
 
         
-    def update(self, acceleration, gyro, magnetometer):
+    def update(self, acceleration, gyro, magnetometer, dt=None):
         """
         dt: Time since last call to process in milliseconds
         """
-        self.update_nomag(acceleration, gyro)
-        acc_x = acceleration[0]
-        acc_y = acceleration[1]
-        acc_z = acceleration[2]
-        mag_x = magnetometer[0]
-        mag_y = magnetometer[1]
-        mag_z = magnetometer[2]
+        self.update_nomag(acceleration, gyro, dt)
+        acc_x, acc_y, acc_z = acceleration
+        mag_x, mag_y, mag_z = magnetometer
 
         # Normalize accelerometer raw values
         l = math.sqrt(pow(acc_x, 2) + pow(acc_y, 2) + pow(acc_z, 2))
@@ -70,3 +61,7 @@ class ComplementaryFilter:
         self.heading = math.degrees(math.atan2(magYcomp, magXcomp))
         if self.heading < 0:
             self.heading += 360
+
+    def compute_angles(self):
+        # For compatibility with other approaches
+        pass

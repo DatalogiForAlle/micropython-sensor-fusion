@@ -54,7 +54,9 @@ Complementary Filter might be interesting.
 
 Kalman filter
 -------------
-TODO. Here are a few references:
+TODO. Not implemented yet. 
+
+Here are a few references:
 http://www.cs.unc.edu/~welch/media/pdf/kalman_intro.pdf
 https://cybernetist.com/2019/01/13/apollo-kalman-filter-and-go/
 

@@ -22,7 +22,7 @@ except ImportError:
     import time
 
 from math import sqrt, atan2, asin, degrees, radians
-from deltat import DeltaT
+from .deltat import DeltaT
 
 class Fusion(object):
     '''
@@ -108,11 +108,14 @@ class Fusion(object):
         q4 += qDot4 * deltat
         norm = 1 / sqrt(q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4)    # normalise quaternion
         self.q = q1 * norm, q2 * norm, q3 * norm, q4 * norm
-        self.heading = 0
-        self.pitch = degrees(-asin(2.0 * (self.q[1] * self.q[3] - self.q[0] * self.q[2])))
-        self.roll = degrees(atan2(2.0 * (self.q[0] * self.q[1] + self.q[2] * self.q[3]),
-            self.q[0] * self.q[0] - self.q[1] * self.q[1] - self.q[2] * self.q[2] + self.q[3] * self.q[3]))
+        # self.heading = 0
+        # self.pitch = degrees(-asin(2.0 * (self.q[1] * self.q[3] - self.q[0] * self.q[2])))
+        # self.roll = degrees(atan2(2.0 * (self.q[0] * self.q[1] + self.q[2] * self.q[3]),
+        #     self.q[0] * self.q[0] - self.q[1] * self.q[1] - self.q[2] * self.q[2] + self.q[3] * self.q[3]))
 
+
+
+        
     def update(self, accel, gyro, mag, ts=None):     # 3-tuples (x, y, z) for accel, gyro and mag data
         mx, my, mz = (mag[x] - self.magbias[x] for x in range(3)) # Units irrelevant (normalised)
         ax, ay, az = accel                  # Units irrelevant (normalised)
@@ -204,8 +207,11 @@ class Fusion(object):
         q4 += qDot4 * deltat
         norm = 1 / sqrt(q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4)    # normalise quaternion
         self.q = q1 * norm, q2 * norm, q3 * norm, q4 * norm
+
+    def compute_angles(self):
         self.heading = self.declination + degrees(atan2(2.0 * (self.q[1] * self.q[2] + self.q[0] * self.q[3]),
             self.q[0] * self.q[0] + self.q[1] * self.q[1] - self.q[2] * self.q[2] - self.q[3] * self.q[3]))
         self.pitch = degrees(-asin(2.0 * (self.q[1] * self.q[3] - self.q[0] * self.q[2])))
         self.roll = degrees(atan2(2.0 * (self.q[0] * self.q[1] + self.q[2] * self.q[3]),
             self.q[0] * self.q[0] - self.q[1] * self.q[1] - self.q[2] * self.q[2] + self.q[3] * self.q[3]))
+
